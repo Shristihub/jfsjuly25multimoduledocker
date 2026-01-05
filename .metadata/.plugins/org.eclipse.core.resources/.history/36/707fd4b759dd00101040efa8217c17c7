@@ -1,0 +1,5 @@
+FROM eclipse-temurin:21
+EXPOSE 8081
+ARG =
+COPY target/spring-restapi-docker-0.0.1-SNAPSHOT.jar cart-api.jar 
+ENTRYPOINT [ "executable" ]

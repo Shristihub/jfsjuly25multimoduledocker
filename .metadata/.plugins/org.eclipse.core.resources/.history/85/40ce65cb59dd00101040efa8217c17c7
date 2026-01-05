@@ -1,0 +1,5 @@
+FROM eclipse-temurin:21
+EXPOSE 8081
+ARG jarname=ekart-cart-service-0.0.1-SNAPSHOT.jar
+COPY target/${jarname} cart-api.jar 
+ENTRYPOINT [ "executable" ]

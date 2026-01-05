@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workingSetManager>
+<workingSet editPageId="org.eclipse.jdt.internal.ui.DynamicSourcesWorkingSet" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1766200717427_0" label="Java Main Sources" name="Java Main Sources"/>
+<workingSet editPageId="org.eclipse.jdt.internal.ui.DynamicSourcesWorkingSet" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1766200717455_1" label="Java Test Sources" name="Java Test Sources"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1766201362887_3" label="ekart-multimodule-app" name="ekart-multimodule-app"/>
+<workingSet editPageId="org.eclipse.ui.resourceWorkingSetPage" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1766202044963_4" label="docker-multimodule-kart" name="docker-multimodule-kart">
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/ekart-cart-service" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/ekart-catalog-service" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/ekart-config-server" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/ekart-gateway-api" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/ekart-info-service" type="4"/>
+<item factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/ekart-inventory-service" type="4"/>
+</workingSet>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1766200719244_2" label="Window Working Set" name="Aggregate for window 1766200719244"/>
+</workingSetManager>

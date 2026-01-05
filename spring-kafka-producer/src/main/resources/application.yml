@@ -1,0 +1,11 @@
+server:
+  port: 8091
+spring:
+  application:
+    name: producer
+  kafka:
+    producer:
+      bootstrap-servers:
+      - kafka:9092  # name of the kafka service in docker
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer	          

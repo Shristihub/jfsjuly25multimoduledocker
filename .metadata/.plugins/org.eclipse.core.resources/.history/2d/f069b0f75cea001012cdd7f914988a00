@@ -1,0 +1,53 @@
+package com.userapp.service;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserServiceImpl implements IUserService{
+	
+	@Autowired
+	JavaMailSender mailSender;
+	
+	private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+	private String notifymessage;
+	private String status;
+	
+	// listening to this topic
+	@KafkaListener(groupId = "",topics = "mytopic")
+	
+	//the message is received by this method
+	// the data coming in captured by the parameter
+ 	private void getNotification(String message) {
+		notifymessage = message;
+		logger.info("Getting notification about product "+message);
+		sendMail("Sri","OrderDetails");
+	}
+	
+
+	public void sendMail(String to, String subject) {
+		logger.info("sending mail");
+		// content to body no attachments
+		SimpleMailMessage message = new SimpleMailMessage();
+		message.setTo(to);
+		message.setSubject(subject);
+		message.setText(notifymessage); // send the message that comes from producer
+		// send the message using JavaMailSender
+		mailSender.send(message);
+		status = "mail send successfully";
+	}
+	
+	
+	@Override
+	public String consumeMessage() {
+		logger.info("consuming message ");
+		return status;
+	}
+
+}

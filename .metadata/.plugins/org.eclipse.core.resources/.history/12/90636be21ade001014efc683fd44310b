@@ -1,0 +1,146 @@
+package com.productcart.service;
+
+import java.util.ArrayList;
+import java.util.Optional;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+
+import com.productcart.model.dtos.CartRequest;
+import com.productcart.model.dtos.CartResponse;
+import com.productcart.model.dtos.Failure;
+import com.productcart.model.dtos.Product;
+import com.productcart.model.dtos.Type;
+import com.productcart.model.dtos.entities.Cart;
+import com.productcart.model.dtos.entities.CartItem;
+import com.productcart.repository.ICartRepository;
+
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+
+@Service
+public class CartServiceImpl implements ICartService {
+
+	private String BASEURI = "http://product-info/info-service/v1/product-info";
+	private ICartRepository cartRepository;
+	private RestClient restClient;
+	@Autowired
+	private ModelMapper mapper;
+
+	public CartServiceImpl(RestClient.Builder restClientBuilder, ICartRepository cartRepository) {
+		this.restClient = restClientBuilder.build();
+		this.cartRepository = cartRepository;
+	}
+
+	@Override
+	@Retry(name = "cart-retryservice",fallbackMethod = "fallbackAddToCart")
+	@CircuitBreaker(name = "cart-cbservice", fallbackMethod = "fallbackAddToCartCB")
+	public Type addToCart(CartRequest cartRequest) {
+		// get the userId;
+		int userId = cartRequest.getUserId();
+		// check if userId in database
+		// if yes return the cart else create a new Cart
+		Cart cart = cartRepository.findByUserId(userId)
+				                  .orElseGet(() -> {
+				                	  Cart newcart = new Cart();
+				                	  newcart.setCartItems(new ArrayList<>());
+				                	  return newcart;
+				                  });
+		// set the userId
+		cart.setUserId(userId);
+		// get the product details from info service
+		Product product = getById(cartRequest.getProductId());
+
+		if (cart.getCartItems().isEmpty()) {
+			// create a new cartitem
+			CartItem newCartItem = new CartItem();
+			newCartItem.setPrice(product.getPrice());
+			newCartItem.setProductId(product.getProductId());
+			newCartItem.setProductName(product.getProductName());
+			newCartItem.setQuantity(cartRequest.getQuantity());
+			newCartItem.setCart(cart);
+			System.out.println(newCartItem);
+			cart.getCartItems().add(newCartItem);
+			System.out.println(cart);
+		} else {
+			// get cartItem from cart
+			// check if the cartItem exists in cart
+			Optional<CartItem> existingItemOpt = cart.getCartItems().stream()
+					// from cartItem get the product id and compare with product selected by the
+					// user
+					.filter(cartItem -> cartItem.getProductId() == product.getProductId())
+					.findFirst();
+			// check if the item is present in optional
+			if (existingItemOpt.isPresent()) {
+				// get the existing cartitem
+				CartItem existingcartItem = existingItemOpt.get();
+				// append the new quantity to the existing quantity
+				existingcartItem.setQuantity(cartRequest.getQuantity() + existingcartItem.getQuantity());
+				System.out.println(existingcartItem);
+				existingcartItem.setCart(cart);
+				System.out.println(cart);
+			}else {
+				CartItem newCartItem = new CartItem();
+				newCartItem.setPrice(product.getPrice());
+				newCartItem.setProductId(product.getProductId());
+				newCartItem.setProductName(product.getProductName());
+				newCartItem.setQuantity(cartRequest.getQuantity());
+				newCartItem.setCart(cart);
+				System.out.println(newCartItem);
+				cart.getCartItems().add(newCartItem);
+				
+			}
+		}
+        //save the cart
+		cartRepository.save(cart);
+		CartResponse cartResponse = mapper.map(cart, CartResponse.class);
+		cartResponse.calculatePrice();
+		System.out.println(cartResponse);
+		return cartResponse;
+	}
+
+	public Product getById(int productId) {
+		// get the product using restClient
+		Product product = restClient.get().uri(BASEURI.concat("/productId/{productId}"), productId).retrieve()
+				.body(Product.class);
+//		System.out.println(product);
+		return product;
+	}
+
+	// fallbackmethod
+	public Type fallbackAddToCart(CartRequest cartRequest, Exception e) {
+		System.out.println("exception " + e.getMessage());
+		return new Failure("Technical error");
+
+	}
+	public Type fallbackAddToCartCB(CartRequest cartRequest, Exception e) {
+		System.out.println("exception " + e.getMessage());
+		return new Failure("Technical error");
+
+	}
+
+	@Override
+	public void updateCart(CartRequest cartRequest) {
+
+	}
+
+	@Override
+	public void removeFromCart(int userId, int productId) {
+
+	}
+
+	@Override
+	public CartResponse viewCart(int userId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void clearCart() {
+		// TODO Auto-generated method stub
+
+	}
+
+}

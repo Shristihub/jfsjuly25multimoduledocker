@@ -1,0 +1,41 @@
+server:
+  port: 8081
+
+
+spring:
+ application:
+  name: product-catalog
+##datasource specific properties 
+# datasource:
+#    username: root
+#    password: root
+#    url: jdbc:mysql://localhost:3306/ekartproductdb
+##jpa properties
+# jpa:
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: true
+ config:
+   import: configserver:http://localhost:8888
+ profiles:
+    active:
+    - dev
+
+message: Goodbye   
+  #http://localhost:8888/product-catalog.yml   
+
+management:
+  endpoints:
+    web:
+      base-path: /my-actuator
+      exposure:
+        include: '*'
+        exclude: beans, env
+  endpoint:
+    health:
+      show-details: always
+
+
+
+
+

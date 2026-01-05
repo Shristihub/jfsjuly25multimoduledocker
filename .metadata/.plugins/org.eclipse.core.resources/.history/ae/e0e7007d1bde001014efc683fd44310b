@@ -1,0 +1,95 @@
+services:
+  mysql:
+    image: mysql8
+    container_name: mysql-container
+    ports:
+      - "3307:3306"
+    environment:
+       MYSQL_ROOT_PASSWORD: root
+       MYSQL_DATABASE: ekartdb
+    networks:
+       - ekart-network
+
+  config-server:
+    build:
+     context: ../ekart-config-server
+     dockerfile: Dockerfile
+    container_name: cofig-container
+    ports:
+      - 8888:8888
+    networks:
+      - ekart-network
+
+  gateway-api:
+    build:
+     context: ../ekart-gateway-api
+     dockerfile: Dockerfile
+    container_name: gateway-api
+    ports:
+      - 9000:9000
+    depends_on:
+      - product-catalog
+      - product-info
+      - product-inventory
+    networks:
+      - ekart-network
+
+  product-catalog:
+    build:
+     context: ../ekart-catalog-service
+     dockerfile: Dockerfile
+    container_name: catalog-container
+    ports:
+      - 8081:8081
+    depends_on:
+      - mysql
+      - product-inventory
+      - config-server
+    networks:
+      - ekart-network
+
+  product-cart:
+    build:
+     context: ../ekart-cart-service
+     dockerfile: Dockerfile
+    container_name: cart-container
+    ports:
+      - 8085:8085
+    depends_on:
+      - mysql
+      - product-info
+      - config-server
+    networks:
+      - ekart-network
+      
+  product-inventory:
+    build:
+     context: ../ekart-inventory-service
+     dockerfile: Dockerfile
+    container_name: inventory-container
+    ports:
+      - 8083:8083
+    depends_on:
+      - mysql
+      - config-server
+    networks:
+      - ekart-network
+
+  product-info:
+    build:
+     context: ../ekart-info-service
+     dockerfile: Dockerfile
+    container_name: info-container
+    ports:
+      - 8082:8082
+    depends_on:
+      - product-catalog
+    networks:
+      - ekart-network
+
+networks:
+  ekart-network:
+    driver: bridge 
+    
+ 
+     
